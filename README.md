@@ -4,6 +4,8 @@ This is a plugin for Hex-Ray's IDA Pro disassembler to map [pintr](https://githu
 
 ### Features
 
+* Put trace log on the corresponding instruction as the comment.
+
 * Set color on the instructions according to the execution result.
   * Yellow indicates that the value doesn't change depending on the input values.
   * Gray indicates that the value changes each time when it is executed.
