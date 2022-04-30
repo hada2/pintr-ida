@@ -8,7 +8,7 @@ import idautils
 import re
 import struct
 
-PINTRIDA_VERSION = "0.1"
+PINTRIDA_VERSION = "0.1.1"
 
 MAX_LOOP_COUNT = 5
 
@@ -149,7 +149,7 @@ def readTraceLog(filename, readIndex):
         eaToDynamicInfo[pc][readIndex] += genNewComment(pc, ins, src, dst, eaCountMaps)
 
         if isJcc(ins):
-            jccMaps.append(pc)
+            jccMaps[pc] = True
 
         if isJcc(prev_ins):
             if f"->{pc:X} " not in eaToDynamicInfo[prev_pc][readIndex]:
@@ -164,6 +164,12 @@ def updateComment():
         if comments[0]:
             setComment(pc, comments[0])
             setColor(pc, COLOR_DEFAULT)
+
+        if comments[0].find("->") >= 0 or comments[1].find("->") >= 0 or comments[2].find("->") >= 0:
+            cmt = re.findall("(->[0-9a-fA-F]+)", comments[0])
+            cmt += re.findall("(->[0-9a-fA-F]+)", comments[1])
+            cmt += re.findall("(->[0-9a-fA-F]+)", comments[2])
+            setComment(pc, " ".join(list(set(cmt))))
 
         if sum([1 if x else 0 for x in comments]) == 1:
             setColor(pc, COLOR_DEFAULT)
@@ -247,7 +253,7 @@ Select 3 pintr trace log files:
         })
 
 eaToDynamicInfo = {}
-jccMaps = []
+jccMaps = {}
 
 def main():
     global f
@@ -276,7 +282,7 @@ def main():
 
     updateComment()
 
-    for ea in jccMaps:
+    for ea in jccMaps.keys():
         patch(ea)
 
     print("Finished")
